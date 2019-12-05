@@ -1,0 +1,17 @@
+{
+    "name": "cs278/composer-audit",
+    "description": "Audit your Composer dependencies for security vulnerabilities.",
+    "type": "composer-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chris Smith",
+            "email": "chris@cs278.org"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {},
+    "config": {
+        "sort-packages": true
+    }
+}
