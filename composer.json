@@ -10,8 +10,24 @@
         }
     ],
     "minimum-stability": "stable",
-    "require": {},
+    "require": {
+        "php": ">= 7.1",
+        "composer-plugin-api": "^1.1",
+        "symfony/yaml": "^4 || ^5"
+    },
+    "require-dev": {
+        "composer/composer": "^1",
+        "composer/semver": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cs278\\ComposerAudit\\": "src"
+        }
+    },
     "config": {
         "sort-packages": true
+    },
+    "extra": {
+        "class": "Cs278\\ComposerAudit\\ComposerPlugin"
     }
 }
