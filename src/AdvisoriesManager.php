@@ -2,9 +2,8 @@
 
 namespace Cs278\ComposerAudit;
 
-use Composer\Downloader\DownloadManager;
-use Composer\Repository\RepositoryManager;
-use Composer\Util\Filesystem;
+use Composer\Composer;
+use Composer\Plugin\PluginInterface;
 
 /**
  * Handles finding security advisories.
@@ -17,14 +16,8 @@ use Composer\Util\Filesystem;
  */
 final class AdvisoriesManager
 {
-    /** @var RepositoryManager */
-    private $repositoryManager;
-
-    /** @var DownloadManager */
-    private $downloadManager;
-
-    /** @var bool Update security advisories even if already present. */
-    private $mustUpdate = false;
+    /** @var AdvisoriesInstaller */
+    private $installer;
 
     private $packageName = 'sensiolabs/security-advisories';
     private $packageConstraint = 'dev-master';
@@ -32,15 +25,32 @@ final class AdvisoriesManager
     /** @var string */
     private $directory;
 
-    public function __construct(RepositoryManager $repositoryManager, DownloadManager $downloadManager)
+    public function __construct(AdvisoriesInstaller $installer)
     {
-        $this->repositoryManager = $repositoryManager;
-        $this->downloadManager = $downloadManager;
+        $this->installer = $installer;
+    }
+
+    public static function create(Composer $composer)
+    {
+        if (version_compare(PluginInterface::PLUGIN_API_VERSION, '2.0.0', '>=')) {
+            $installer = new AdvisoriesInstallerV2(
+                $composer->getLoop(),
+                $composer->getRepositoryManager(),
+                $composer->getDownloadManager()
+            );
+        } else {
+            $installer = new AdvisoriesInstallerV1(
+                $composer->getRepositoryManager(),
+                $composer->getDownloadManager()
+            );
+        }
+
+        return new self($installer);
     }
 
     public function mustUpdate()
     {
-        $this->mustUpdate = true;
+        $this->installer->mustUpdate();
     }
 
     public function findAll()
@@ -54,33 +64,11 @@ final class AdvisoriesManager
     private function getDirectory()
     {
         if (!isset($this->directory)) {
-            $directory = dirname(__DIR__).'/var';
-
-            if (is_file("{$directory}/data.lock") && is_dir("{$directory}/data")) {
-                $installedVersion = trim(file_get_contents("{$directory}/data.lock"));
-            } else {
-                $installedVersion = null;
-            }
-
-            // No version installed or an update is requested, fetch package data.
-            if ($installedVersion === null || $this->mustUpdate) {
-                $package = $this->repositoryManager->findPackage($this->packageName, $this->packageConstraint);
-                $version = $package->getFullPrettyVersion(false);
-            } else {
-                $version = $installedVersion;
-            }
-
-            if ($version !== $installedVersion) {
-                $fs = new Filesystem();
-                $fs->remove("{$directory}/data.lock");
-                $fs->remove("{$directory}/data");
-
-                $this->downloadManager->download($package, "{$directory}/data", false);
-
-                file_put_contents("{$directory}/data.lock", $version."\n");
-            }
-
-            $this->directory = "{$directory}/data";
+            $this->directory = $this->installer->install(
+                dirname(__DIR__).'/var',
+                $this->packageName,
+                $this->packageConstraint
+            );
         }
 
         return $this->directory;

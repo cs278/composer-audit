@@ -51,10 +51,7 @@ final class AuditCommand extends BaseCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $advisoriesManager = new AdvisoriesManager(
-            $this->getComposer()->getRepositoryManager(),
-            $this->getComposer()->getDownloadManager()
-        );
+        $advisoriesManager = AdvisoriesManager::create($this->getComposer());
 
         if ($this->updateAdvisories) {
             $advisoriesManager->mustUpdate();
