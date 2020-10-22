@@ -1,0 +1,15 @@
+--TEST--
+Vulnerable development package does not error when --no-dev is used
+--CONDITION--
+true
+--COMPOSER--
+{
+    "require-dev": {
+        "symfony/http-foundation": "=2.0.4"
+    }
+}
+--ARGS--
+--no-dev
+--EXPECT-EXIT--
+0
+--EXPECT-OUTPUT--
