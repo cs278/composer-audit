@@ -13,7 +13,7 @@
     "require": {
         "php": ">= 7.1",
         "composer-plugin-api": "^1.1 || ^2",
-        "symfony/yaml": "^4 || ^5"
+        "symfony/yaml": "^4.4 || ^5"
     },
     "require-dev": {
         "composer/composer": "^1 || ^2@RC",
