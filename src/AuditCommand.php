@@ -153,15 +153,18 @@ final class AuditCommand extends BaseCommand
                 foreach ($packageAdvisories as $advisory) {
                     $title = $advisory['title'];
 
-                    $output->write(' * ');
+                    if (isset($advisory['link']) && strlen($advisory['link']) > 0) {
+                        $link = $advisory['link'];
+                    } else {
+                        $link = null;
+                    }
 
                     if (isset($advisory['cve']) && strlen($advisory['cve']) > 0) {
+                        $cve = $advisory['cve'];
                         $cveLink = sprintf(
                             'https://cve.mitre.org/cgi-bin/cvename.cgi?name=%s',
                             rawurlencode($advisory['cve'])
                         );
-
-                        $output->write(self::formatHyperlink($output, $cveLink, $advisory['cve']).': ');
 
                         // Strip any reference of the CVE from the start of the advisory title.
                         $title = preg_replace(
@@ -169,13 +172,29 @@ final class AuditCommand extends BaseCommand
                             '',
                             $title
                         );
+                    } else {
+                        $cve = $cveLink = null;
                     }
 
-                    if (isset($advisory['link']) && strlen($advisory['link']) > 0) {
-                        $title = self::formatHyperlink($output, $advisory['link'], $title);
-                    }
+                    if ($output->isDecorated()) {
+                        $output->writeln(sprintf(
+                            $cve !== null ? '* %s: %s' : '* %2$s',
+                            $cveLink !== null ? self::formatHyperlink($output, $cveLink, $cve): $cve,
+                            $link !== null ? self::formatHyperlink($output, $link, $title) : $title
+                        ));
+                    } else {
+                        $output->writeln(sprintf(
+                            $cve !== null ? '* %s %s' : '* %2$s',
+                            $cve,
+                            $title
+                        ));
 
-                    $output->writeln($title);
+                        foreach ([$cveLink, $link] as $url) {
+                            if ($url !== null) {
+                                $output->writeln(sprintf("  - <%s>", $url));
+                            }
+                        }
+                    }
                 }
 
                 $output->writeln('');
@@ -189,7 +208,7 @@ final class AuditCommand extends BaseCommand
 
     private static function formatHyperlink(OutputInterface $output, string $link, ?string $label): string
     {
-        $useEscapeSequence = $output->getFormatter()->isDecorated();
+        $useEscapeSequence = $output->isDecorated();
 
         if ($label !== null) {
             $format = $useEscapeSequence
