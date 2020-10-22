@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Cs278\ComposerAudit;
 
 use Composer\Command\BaseCommand;
@@ -96,7 +98,7 @@ final class AuditCommand extends BaseCommand
             $packages = $lockData['packages'];
         }
 
-        $packages = array_map(function (array $package) {
+        $packages = array_map(static function (array $package): array {
             return [
                 'name' => $package['name'],
                 'version' => $package['version'],
@@ -129,7 +131,7 @@ final class AuditCommand extends BaseCommand
 
         if ($advisories !== []) {
             // Advise the user of the advisories.
-            $totalAdvisories = array_sum(array_map(function (array $packageAdvisories) {
+            $totalAdvisories = array_sum(array_map(static function (array $packageAdvisories): int {
                 return \count($packageAdvisories);
             }, $advisories));
             $packagesAffected = \count($advisories);
