@@ -3,6 +3,7 @@
 namespace Cs278\ComposerAudit;
 
 use Composer\Command\BaseCommand;
+use Composer\Package\PackageInterface;
 use Composer\Semver\Semver;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -57,8 +58,34 @@ final class AuditCommand extends BaseCommand
             $advisoriesManager->mustUpdate();
         }
 
-        // @todo Use installed.json when lock file is disabled?
-        $lockData = $this->getComposer()->getLocker()->getLockData();
+        // NULL if option is unknown.
+        $lockOption = $this->getComposer()->getConfig()->get('lock');
+
+        if ($lockOption === null || $lockOption === true) {
+            if (!$this->getComposer()->getLocker()->isLocked()) {
+                $output->writeln('<error>Lock file not found.</error>');
+
+                return 2;
+            }
+
+            $lockData = $this->getComposer()->getLocker()->getLockData();
+            $usingInstalled = false;
+        } else {
+            $lockData = [];
+            $lockData['packages'] = array_map(static function (PackageInterface $package): array {
+                return [
+                    'name' => $package->getName(),
+                    'version' => $package->getPrettyVersion(),
+                ];
+            }, $this->getComposer()->getRepositoryManager()->getLocalRepository()->getCanonicalPackages());
+            $lockData['packages-dev'] = [];
+
+            if (!$this->dev) {
+                $output->writeln('<warning>Warning --no-dev option has no effect when lock file generation is disabled.</warning>');
+            }
+
+            $usingInstalled = true;
+        }
 
         if ($this->dev) {
             $packages = array_merge(
@@ -109,7 +136,9 @@ final class AuditCommand extends BaseCommand
 
             // @todo Pluralization?
             $output->writeln(sprintf(
-                '<error>Found %u advisories affecting %u package(s).</error>',
+                $usingInstalled
+                    ? '<error>Found %u advisories affecting %u installed package(s).</error>'
+                    : '<error>Found %u advisories affecting %u package(s).</error>',
                 $totalAdvisories,
                 $packagesAffected
             ));
