@@ -110,8 +110,8 @@ final class AuditCommand extends BaseCommand
             // @todo Pluralization?
             $output->writeln(sprintf(
                 '<error>Found %u advisories affecting %u package(s).</error>',
-                $packagesAffected,
-                $totalAdvisories
+                $totalAdvisories,
+                $packagesAffected
             ));
 
             $output->writeln('');
