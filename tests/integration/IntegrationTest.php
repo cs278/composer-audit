@@ -20,6 +20,7 @@ use function Cs278\Mktemp\temporaryDir;
 final class IntegrationTest extends TestCase
 {
     /**
+     * @coversNothing
      * @dataProvider dataRun
      */
     public function testRun(int $expectedExit, string $expectedOutput, string $condition, array $composerJson, array $args)
