@@ -20,6 +20,7 @@ use function Cs278\Mktemp\temporaryDir;
 final class IntegrationTest extends TestCase
 {
     /**
+     * @coversNothing
      * @dataProvider dataRun
      */
     public function testRun(int $expectedExit, string $expectedOutput, string $condition, array $composerJson, array $args)
@@ -46,10 +47,7 @@ final class IntegrationTest extends TestCase
         $composer = function (...$args) use ($workingDir) {
             array_unshift($args, getcwd().'/vendor/bin/composer');
 
-            return new Process($args, $workingDir, [
-                // Use the network as little as possible.
-                'COMPOSER_DISABLE_NETWORK' => 1,
-            ]);
+            return new Process($args, $workingDir);
         };
 
         try {
