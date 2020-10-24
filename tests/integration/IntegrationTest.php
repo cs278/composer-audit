@@ -44,7 +44,9 @@ final class IntegrationTest extends TestCase
 
         $workingDir = temporaryDir();
         $composer = function (...$args) use ($workingDir) {
-            return new Process([\getcwd().'/vendor/bin/composer', ...$args], $workingDir, [
+            array_unshift($args, getcwd().'/vendor/bin/composer');
+
+            return new Process($args, $workingDir, [
                 // Use the network as little as possible.
                 'COMPOSER_DISABLE_NETWORK' => 1,
             ]);
