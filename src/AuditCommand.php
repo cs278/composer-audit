@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Cs278\ComposerAudit;
 
 use Composer\Command\BaseCommand;
+use Composer\Package\PackageInterface;
 use Composer\Semver\Semver;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -57,8 +60,34 @@ final class AuditCommand extends BaseCommand
             $advisoriesManager->mustUpdate();
         }
 
-        // @todo Use installed.json when lock file is disabled?
-        $lockData = $this->getComposer()->getLocker()->getLockData();
+        // NULL if option is unknown.
+        $lockOption = $this->getComposer()->getConfig()->get('lock');
+
+        if ($lockOption === null || $lockOption === true) {
+            if (!$this->getComposer()->getLocker()->isLocked()) {
+                $output->writeln('<error>Lock file not found.</error>');
+
+                return 2;
+            }
+
+            $lockData = $this->getComposer()->getLocker()->getLockData();
+            $usingInstalled = false;
+        } else {
+            $lockData = [];
+            $lockData['packages'] = array_map(static function (PackageInterface $package): array {
+                return [
+                    'name' => $package->getName(),
+                    'version' => $package->getPrettyVersion(),
+                ];
+            }, $this->getComposer()->getRepositoryManager()->getLocalRepository()->getCanonicalPackages());
+            $lockData['packages-dev'] = [];
+
+            if (!$this->dev) {
+                $output->writeln('<warning>Warning --no-dev option has no effect when lock file generation is disabled.</warning>');
+            }
+
+            $usingInstalled = true;
+        }
 
         if ($this->dev) {
             $packages = array_merge(
@@ -69,7 +98,7 @@ final class AuditCommand extends BaseCommand
             $packages = $lockData['packages'];
         }
 
-        $packages = array_map(function (array $package) {
+        $packages = array_map(static function (array $package): array {
             return [
                 'name' => $package['name'],
                 'version' => $package['version'],
@@ -102,16 +131,18 @@ final class AuditCommand extends BaseCommand
 
         if ($advisories !== []) {
             // Advise the user of the advisories.
-            $totalAdvisories = array_sum(array_map(function (array $packageAdvisories) {
+            $totalAdvisories = array_sum(array_map(static function (array $packageAdvisories): int {
                 return \count($packageAdvisories);
             }, $advisories));
             $packagesAffected = \count($advisories);
 
             // @todo Pluralization?
             $output->writeln(sprintf(
-                '<error>Found %u advisories affecting %u package(s).</error>',
-                $packagesAffected,
-                $totalAdvisories
+                $usingInstalled
+                    ? '<error>Found %u advisories affecting %u installed package(s).</error>'
+                    : '<error>Found %u advisories affecting %u package(s).</error>',
+                $totalAdvisories,
+                $packagesAffected
             ));
 
             $output->writeln('');
@@ -124,15 +155,18 @@ final class AuditCommand extends BaseCommand
                 foreach ($packageAdvisories as $advisory) {
                     $title = $advisory['title'];
 
-                    $output->write(' * ');
+                    if (isset($advisory['link']) && strlen($advisory['link']) > 0) {
+                        $link = $advisory['link'];
+                    } else {
+                        $link = null;
+                    }
 
                     if (isset($advisory['cve']) && strlen($advisory['cve']) > 0) {
+                        $cve = $advisory['cve'];
                         $cveLink = sprintf(
                             'https://cve.mitre.org/cgi-bin/cvename.cgi?name=%s',
                             rawurlencode($advisory['cve'])
                         );
-
-                        $output->write(self::formatHyperlink($output, $cveLink, $advisory['cve']).': ');
 
                         // Strip any reference of the CVE from the start of the advisory title.
                         $title = preg_replace(
@@ -140,13 +174,29 @@ final class AuditCommand extends BaseCommand
                             '',
                             $title
                         );
+                    } else {
+                        $cve = $cveLink = null;
                     }
 
-                    if (isset($advisory['link']) && strlen($advisory['link']) > 0) {
-                        $title = self::formatHyperlink($output, $advisory['link'], $title);
-                    }
+                    if ($output->isDecorated()) {
+                        $output->writeln(sprintf(
+                            $cve !== null ? '* %s: %s' : '* %2$s',
+                            $cveLink !== null ? self::formatHyperlink($output, $cveLink, $cve): $cve,
+                            $link !== null ? self::formatHyperlink($output, $link, $title) : $title
+                        ));
+                    } else {
+                        $output->writeln(sprintf(
+                            $cve !== null ? '* %s %s' : '* %2$s',
+                            $cve,
+                            $title
+                        ));
 
-                    $output->writeln($title);
+                        foreach ([$cveLink, $link] as $url) {
+                            if ($url !== null) {
+                                $output->writeln(sprintf("  - <%s>", $url));
+                            }
+                        }
+                    }
                 }
 
                 $output->writeln('');
@@ -160,7 +210,7 @@ final class AuditCommand extends BaseCommand
 
     private static function formatHyperlink(OutputInterface $output, string $link, ?string $label): string
     {
-        $useEscapeSequence = $output->getFormatter()->isDecorated();
+        $useEscapeSequence = $output->isDecorated();
 
         if ($label !== null) {
             $format = $useEscapeSequence

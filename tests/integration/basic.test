@@ -1,0 +1,9 @@
+--TEST--
+No packages results in no errors
+--CONDITION--
+true
+--COMPOSER--
+{}
+--EXPECT-EXIT--
+0
+--EXPECT-OUTPUT--

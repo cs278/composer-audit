@@ -37,16 +37,20 @@ abstract class AdvisoriesInstaller
     {
         if (is_file("{$varDirectory}/data.lock") && is_dir("{$varDirectory}/data")) {
             $installedVersion = trim(file_get_contents("{$varDirectory}/data.lock"));
+            $lastUpdated = filemtime("{$varDirectory}/data.lock");
         } else {
             $installedVersion = null;
+            $lastUpdated = 0;
         }
 
         // No version installed or an update is requested, fetch package data.
-        if ($installedVersion === null || $this->mustUpdate) {
+        if ((time() - $lastUpdated) > 3600 || $this->mustUpdate) {
             $package = $this->repositoryManager->findPackage($packageName, $packageConstraint);
             $version = $package->getName().'@'.$package->getFullPrettyVersion(false);
+            $updated = true;
         } else {
             $version = $installedVersion;
+            $updated = false;
         }
 
         if ($version !== $installedVersion) {
@@ -57,6 +61,8 @@ abstract class AdvisoriesInstaller
             $this->downloadAndInstall("{$varDirectory}/data", $package);
 
             file_put_contents("{$varDirectory}/data.lock", $version."\n");
+        } elseif ($updated) {
+            touch("{$varDirectory}/data.lock");
         }
 
         return "{$varDirectory}/data";
