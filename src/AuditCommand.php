@@ -7,8 +7,10 @@ namespace Cs278\ComposerAudit;
 use Composer\Command\BaseCommand;
 use Composer\Package\PackageInterface;
 use Composer\Semver\Semver;
+use Symfony\Component\Console\Cursor;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 
@@ -129,6 +131,12 @@ final class AuditCommand extends BaseCommand
             }
         }
 
+        self::clearLine(
+            $output instanceof ConsoleOutputInterface
+                ? $output->getErrorOutput()
+                : $output
+        );
+
         if ($advisories !== []) {
             // Advise the user of the advisories.
             $totalAdvisories = array_sum(array_map(static function (array $packageAdvisories): int {
@@ -223,5 +231,21 @@ final class AuditCommand extends BaseCommand
         }
 
         return sprintf($format, $link, $label);
+    }
+
+    private static function clearLine(OutputInterface $output): void
+    {
+        if ($output->isDecorated()) {
+            if (\class_exists(Cursor::class)) {
+                (new Cursor($output))
+                    ->clearLine()
+                    ->moveToColumn(1);
+            } else {
+                $output->write("\x1b[2K");
+                $output->write(sprintf("\x1b[%dG", 1));
+            }
+        } else {
+            $output->writeln('');
+        }
     }
 }
