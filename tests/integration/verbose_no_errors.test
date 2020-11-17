@@ -1,0 +1,12 @@
+--TEST--
+No packages results in no errors (verbose outputs message)
+--CONDITION--
+true
+--COMPOSER--
+{}
+--ARGS--
+-v
+--EXPECT-EXIT--
+0
+--EXPECT-OUTPUT--
+No advisories found for any packages.
