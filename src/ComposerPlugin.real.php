@@ -10,8 +10,6 @@ use Composer\Plugin\Capability\CommandProvider as CommandProviderCapability;
 
 /**
  * Composer Audit Plugin declaration.
- *
- * Note this file intentionally remains compatible with PHP 5.3 syntax.
  */
 final class ComposerPlugin implements PluginInterface, Capable
 {
