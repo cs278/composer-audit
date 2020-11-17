@@ -52,3 +52,17 @@ jobs:
           vendor/bin/phpunit --version | head -n1 >&2
 
           vendor/bin/phpunit --verbose $args
+  # Verifies that the plugin entry point still parses on PHP 5.3, users of 5.3
+  # cannot use this Composer plugin but at least it won't break their Composer.
+  legacy:
+    runs-on: ubuntu-latest
+    name: PHP 5.3
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@151d1849c224dd5757287959c3c93f9e748f24d1
+        with:
+          php-version: 5.3
+      - name: Parse ComposerPlugin.php
+        run: php -l src/ComposerPlugin.php
+      - name: Parse ComposerPlugin.fake.php
+        run: php -l src/ComposerPlugin.fake.php
