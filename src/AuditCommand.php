@@ -213,6 +213,10 @@ final class AuditCommand extends BaseCommand
             return 1;
         }
 
+        if ($output->isVerbose()) {
+            $output->writeln('No advisories found for any packages.');
+        }
+
         return 0;
     }
 
