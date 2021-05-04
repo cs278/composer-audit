@@ -25,7 +25,7 @@ jobs:
     name: PHP ${{ matrix.php }} / ${{ matrix.deps }}
     steps:
       - uses: actions/checkout@v2
-      - uses: shivammathur/setup-php@151d1849c224dd5757287959c3c93f9e748f24d1
+      - uses: shivammathur/setup-php@4067ce8b814db5bfc731c8906aa3034f28911e9f
         with:
           php-version: ${{ matrix.php }}
       - name: Cache dependencies
@@ -59,7 +59,7 @@ jobs:
     name: PHP 5.3
     steps:
       - uses: actions/checkout@v2
-      - uses: shivammathur/setup-php@151d1849c224dd5757287959c3c93f9e748f24d1
+      - uses: shivammathur/setup-php@4067ce8b814db5bfc731c8906aa3034f28911e9f
         with:
           php-version: 5.3
       - name: Parse ComposerPlugin.php
