@@ -67,3 +67,8 @@ jobs:
         run: php -l src/ComposerPlugin.php
       - name: Parse ComposerPlugin.fake.php
         run: php -l src/ComposerPlugin.fake.php
+      - name: Integration test
+        run: |
+          composer global config repositories.0 path "$(pwd)"
+          composer global require cs278/composer-audit '*@dev'
+          composer global audit -vvv
