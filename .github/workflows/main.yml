@@ -67,8 +67,19 @@ jobs:
         run: php -l src/ComposerPlugin.php
       - name: Parse ComposerPlugin.fake.php
         run: php -l src/ComposerPlugin.fake.php
+      - name: Parse AuditNotCompatibleCommand.php
+        run: php -l src/AuditNotCompatibleCommand.php
       - name: Integration test
         run: |
           composer global config repositories.0 path "$(pwd)"
-          composer global require cs278/composer-audit '*@dev'
+          composer global require --ignore-platform-reqs cs278/composer-audit '*@dev'
+
+          set +e
           composer global audit -vvv
+          result=$?
+          set -e
+
+          if [ $result -ne 2 ]; then
+            echo "Expected audit command to exit with error code 2, got: ${result}" >&2
+            exit 1
+          fi
