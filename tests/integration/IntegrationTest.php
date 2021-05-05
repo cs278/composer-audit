@@ -19,6 +19,42 @@ use function Cs278\Mktemp\temporaryDir;
  */
 final class IntegrationTest extends TestCase
 {
+    /** @var string */
+    private static $cacheDir;
+
+    /** @var \Closure[]  */
+    private static $cleanupAfterClass = [];
+
+    public static function setUpBeforeClass()
+    {
+        // Find cache directory of the users Composer installtion, if it cannot
+        // be found fallback to a temporary one for the lifetime of these tests.
+        $process = new Process([
+            'composer',
+            'config',
+            'cache-dir',
+        ]);
+
+        $process->run();
+        $result = trim($process->getOutput());
+
+        if ($process->isSuccessful() && $result !== '' && is_dir($result)) {
+            self::$cacheDir = $result;
+        } else {
+            self::$cacheDir = temporaryDir();
+            self::$cleanupAfterClass[] = function () {
+                (new Filesystem())->remove(self::$cacheDir); // @todo Add require-dev for this
+            };
+        }
+    }
+
+    public static function tearDownAfterClass()
+    {
+        foreach (self::$cleanupAfterClass as $callback) {
+            $callback();
+        }
+    }
+
     /**
      * @coversNothing
      * @dataProvider dataRun
@@ -47,7 +83,10 @@ final class IntegrationTest extends TestCase
         $composer = function (...$args) use ($workingDir) {
             array_unshift($args, getcwd().'/vendor/bin/composer');
 
-            return new Process($args, $workingDir);
+            return new Process($args, $workingDir, [
+                'COMPOSER_HOME' => $workingDir.'/.composer',
+                'COMPOSER_CACHE_DIR' => self::$cacheDir,
+            ]);
         };
 
         try {
