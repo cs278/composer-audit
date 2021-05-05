@@ -2,10 +2,36 @@
 
 namespace Cs278\ComposerAudit;
 
-if (!class_exists(__NAMESPACE__.'\\ComposerPlugin', false)) {
-    if (\PHP_VERSION_ID >= 70100) {
-        require __DIR__.'/ComposerPlugin.real.php';
-    } else {
-        require __DIR__.'/ComposerPlugin.fake.php';
+use Composer\Composer;
+use Composer\IO\IOInterface;
+use Composer\Plugin\PluginInterface;
+use Composer\Plugin\Capable;
+use Composer\Plugin\Capability\CommandProvider as CommandProviderCapability;
+
+/**
+ * Composer Audit Plugin declaration.
+ */
+final class ComposerPlugin implements PluginInterface, Capable
+{
+    public function activate(Composer $composer, IOInterface $io)
+    {
+
+    }
+
+    public function deactivate(Composer $composer, IOInterface $io)
+    {
+
+    }
+
+    public function uninstall(Composer $composer, IOInterface $io)
+    {
+
+    }
+
+    public function getCapabilities()
+    {
+        return [
+            CommandProviderCapability::class => CommandProvider::class,
+        ];
     }
 }
