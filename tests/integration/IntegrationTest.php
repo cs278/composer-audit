@@ -7,6 +7,7 @@ namespace Cs278\ComposerAudit;
 use Composer\Composer;
 use Composer\Semver\Semver;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bridge\PhpUnit\SetUpTearDownTrait;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -19,12 +20,60 @@ use function Cs278\Mktemp\temporaryDir;
  */
 final class IntegrationTest extends TestCase
 {
+    use SetUpTearDownTrait;
+
+    /** @var string|null */
+    private static $cacheDir = null;
+
+    /** @var \Closure[]  */
+    private static $cleanupAfterClass = [];
+
+    public static function doSetUpBeforeClass()
+    {
+        // Find cache directory of the users Composer installtion, if it cannot
+        // be found fallback to a temporary one for the lifetime of these tests.
+        $process = new Process([
+            'composer',
+            'config',
+            'cache-dir',
+        ]);
+
+        $process->run();
+        $result = trim($process->getOutput());
+
+        if ($process->isSuccessful() && $result !== '' && is_dir($result)) {
+            self::$cacheDir = $result;
+        } else {
+            self::$cacheDir = temporaryDir();
+            self::$cleanupAfterClass[] = function () {
+                (new Filesystem())->remove(self::$cacheDir);
+            };
+        }
+
+        self::$cleanupAfterClass[] = function () {
+            self::$cacheDir = null;
+        };
+    }
+
+    public static function doTearDownAfterClass()
+    {
+        try {
+            foreach (self::$cleanupAfterClass as $callback) {
+                $callback();
+            }
+        } finally {
+            self::$cleanupAfterClass = [];
+        }
+    }
+
     /**
      * @coversNothing
      * @dataProvider dataRun
      */
     public function testRun(int $expectedExit, string $expectedOutput, string $condition, array $composerJson, array $args)
     {
+        \assert(self::$cacheDir !== null);
+
         $composerJsonTemplate = [
             'require-dev' => [
                 'cs278/composer-audit' => '*@dev',
@@ -47,7 +96,10 @@ final class IntegrationTest extends TestCase
         $composer = function (...$args) use ($workingDir) {
             array_unshift($args, getcwd().'/vendor/bin/composer');
 
-            return new Process($args, $workingDir);
+            return new Process($args, $workingDir, [
+                'COMPOSER_HOME' => $workingDir.'/.composer',
+                'COMPOSER_CACHE_DIR' => self::$cacheDir,
+            ]);
         };
 
         try {
@@ -81,7 +133,7 @@ final class IntegrationTest extends TestCase
             self::assertEquals($expectedOutput, $proc->getOutput());
             self::assertEquals($expectedExit, $proc->getExitCode());
         } finally {
-            (new Filesystem())->remove($workingDir); // @todo Add require-dev for this
+            (new Filesystem())->remove($workingDir);
         }
     }
 
