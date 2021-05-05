@@ -19,8 +19,8 @@
         "cs278/mktemp": "^1",
         "composer/composer": "^1 || ^2@RC",
         "composer/semver": "*",
-        "phpunit/phpunit": "^7.5.20 || ^9",
         "symfony/filesystem": "^4.4 || ^5",
+        "symfony/phpunit-bridge": "^5.2",
         "symfony/process": "^4.4 || ^5"
     },
     "autoload": {

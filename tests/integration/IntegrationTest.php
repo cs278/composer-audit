@@ -7,6 +7,7 @@ namespace Cs278\ComposerAudit;
 use Composer\Composer;
 use Composer\Semver\Semver;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bridge\PhpUnit\SetUpTearDownTrait;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -19,13 +20,15 @@ use function Cs278\Mktemp\temporaryDir;
  */
 final class IntegrationTest extends TestCase
 {
+    use SetUpTearDownTrait;
+
     /** @var string */
     private static $cacheDir;
 
     /** @var \Closure[]  */
     private static $cleanupAfterClass = [];
 
-    public static function setUpBeforeClass()
+    public static function doSetUpBeforeClass()
     {
         // Find cache directory of the users Composer installtion, if it cannot
         // be found fallback to a temporary one for the lifetime of these tests.
@@ -48,7 +51,7 @@ final class IntegrationTest extends TestCase
         }
     }
 
-    public static function tearDownAfterClass()
+    public static function doTearDownAfterClass()
     {
         foreach (self::$cleanupAfterClass as $callback) {
             $callback();

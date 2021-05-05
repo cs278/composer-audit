@@ -50,9 +50,9 @@ jobs:
           fi
       - name: PHPUnit
         run: |
-          vendor/bin/phpunit --version | head -n1 >&2
+          vendor/bin/simple-phpunit --version | head -n1 >&2
 
-          vendor/bin/phpunit --verbose $args
+          vendor/bin/simple-phpunit --verbose $args
   # Verifies that the plugin entry point still parses on PHP 5.3, users of 5.3
   # cannot use this Composer plugin but at least it won't break their Composer.
   legacy:
