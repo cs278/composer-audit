@@ -22,8 +22,8 @@ final class IntegrationTest extends TestCase
 {
     use SetUpTearDownTrait;
 
-    /** @var string */
-    private static $cacheDir;
+    /** @var string|null */
+    private static $cacheDir = null;
 
     /** @var \Closure[]  */
     private static $cleanupAfterClass = [];
@@ -49,12 +49,20 @@ final class IntegrationTest extends TestCase
                 (new Filesystem())->remove(self::$cacheDir);
             };
         }
+
+        self::$cleanupAfterClass[] = function () {
+            self::$cacheDir = null;
+        };
     }
 
     public static function doTearDownAfterClass()
     {
-        foreach (self::$cleanupAfterClass as $callback) {
-            $callback();
+        try {
+            foreach (self::$cleanupAfterClass as $callback) {
+                $callback();
+            }
+        } finally {
+            self::$cleanupAfterClass = [];
         }
     }
 
@@ -64,6 +72,8 @@ final class IntegrationTest extends TestCase
      */
     public function testRun(int $expectedExit, string $expectedOutput, string $condition, array $composerJson, array $args)
     {
+        \assert(self::$cacheDir !== null);
+
         $composerJsonTemplate = [
             'require-dev' => [
                 'cs278/composer-audit' => '*@dev',
