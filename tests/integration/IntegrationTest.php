@@ -46,7 +46,7 @@ final class IntegrationTest extends TestCase
         } else {
             self::$cacheDir = temporaryDir();
             self::$cleanupAfterClass[] = function () {
-                (new Filesystem())->remove(self::$cacheDir); // @todo Add require-dev for this
+                (new Filesystem())->remove(self::$cacheDir);
             };
         }
     }
@@ -123,7 +123,7 @@ final class IntegrationTest extends TestCase
             self::assertEquals($expectedOutput, $proc->getOutput());
             self::assertEquals($expectedExit, $proc->getExitCode());
         } finally {
-            (new Filesystem())->remove($workingDir); // @todo Add require-dev for this
+            (new Filesystem())->remove($workingDir);
         }
     }
 
