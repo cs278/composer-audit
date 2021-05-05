@@ -1,6 +1,6 @@
 <?php
 
-namespace Cs278\ComposerAudit;
+namespace Cs278\ComposerAudit\Legacy;
 
 use Composer\Command\BaseCommand;
 use Symfony\Component\Console\Input\InputInterface;

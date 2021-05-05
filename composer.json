@@ -32,6 +32,6 @@
         "sort-packages": true
     },
     "extra": {
-        "class": "Cs278\\ComposerAudit\\ComposerPlugin"
+        "class": "Cs278\\ComposerAudit\\Legacy\\ComposerPlugin"
     }
 }

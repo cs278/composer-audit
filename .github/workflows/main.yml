@@ -63,12 +63,11 @@ jobs:
       - uses: shivammathur/setup-php@4067ce8b814db5bfc731c8906aa3034f28911e9f
         with:
           php-version: 5.3
-      - name: Parse ComposerPlugin.php
-        run: php -l src/ComposerPlugin.php
-      - name: Parse ComposerPlugin.fake.php
-        run: php -l src/ComposerPlugin.fake.php
-      - name: Parse AuditNotCompatibleCommand.php
-        run: php -l src/AuditNotCompatibleCommand.php
+      - name: Syntax check
+        run: |
+          while read file; do
+            php -l "$file"
+          done < <(find src/Legacy -type f -name "*.php")
       - name: Integration test
         run: |
           composer global config repositories.0 path "$(pwd)"
