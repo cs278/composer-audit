@@ -21,7 +21,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 final class AdvisoriesManager
 {
-    /** @var AdvisoriesInstaller */
+    /** @var AdvisoriesInstallerInterface */
     private $installer;
 
     /** @var VersionParser */
@@ -36,7 +36,7 @@ final class AdvisoriesManager
     /** @var array<string,array<mixed,mixed>> */
     private $advisories;
 
-    public function __construct(AdvisoriesInstaller $installer)
+    public function __construct(AdvisoriesInstallerInterface $installer)
     {
         $this->installer = $installer;
         $this->versionParser = new VersionParser();

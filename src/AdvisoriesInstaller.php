@@ -15,7 +15,7 @@ use Composer\Util\Filesystem;
  * @copyright 2020 Chris Smith
  * @license MIT
  */
-abstract class AdvisoriesInstaller
+abstract class AdvisoriesInstaller implements AdvisoriesInstallerInterface
 {
     /** @var RepositoryManager */
     private $repositoryManager;
