@@ -100,34 +100,14 @@ final class AuditCommand extends BaseCommand
             $packages = $lockData['packages'];
         }
 
-        $packages = array_map(static function (array $package): array {
-            return [
-                'name' => $package['name'],
-                'version' => $package['version'],
-                'reference' => sprintf('composer://%s', $package['name']),
-            ];
-        }, $packages);
-
-        $packages = array_column($packages, 'version', 'reference');
+        $packages = array_column($packages, 'version', 'name');
 
         $advisories = [];
 
         // Find all the advisories for installed packages.
-        foreach ($advisoriesManager->findAll() as $file) {
-            $advisory = Yaml::parseFile($file);
-            $advisory['_file'] = $file;
-
-            if (isset($packages[$advisory['reference']])) {
-                $installedVersion = $packages[$advisory['reference']];
-
-                foreach ($advisory['branches'] as $branch) {
-                    $constraint = implode(',', $branch['versions']);
-
-                    if (Semver::satisfies($installedVersion, $constraint)) {
-                        $advisories[$advisory['reference']][] = $advisory;
-                        break;
-                    }
-                }
+        foreach ($packages as $name => $version) {
+            foreach ($advisoriesManager->findByPackageNameAndVersion($name, $version) as $advisory) {
+                $advisories[$name][] = $advisory;
             }
         }
 
