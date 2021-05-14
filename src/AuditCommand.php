@@ -138,7 +138,7 @@ final class AuditCommand extends BaseCommand
             ksort($advisories, \SORT_NATURAL | \SORT_ASC);
 
             foreach ($advisories as $reference => $packageAdvisories) {
-                $output->writeln(sprintf('<info>%s (%s)</info>', $reference, $packages[$reference]));
+                $output->writeln(sprintf('<info>composer://%s (%s)</info>', $reference, $packages[$reference]));
 
                 foreach ($packageAdvisories as $advisory) {
                     $title = $advisory['title'];
