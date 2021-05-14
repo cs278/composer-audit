@@ -1,0 +1,8 @@
+title:     "CVE-9999-1234567: Left the front door open"
+link:      https://example.com/CVE-9999-1234567
+cve:       CVE-9999-1234567
+branches:
+    "1337":
+        time:     2020-01-01 12:32:00
+        versions: ['>=13.37.0', '<13.37.100']
+reference: composer://foo/bar
