@@ -1,0 +1,45 @@
+--TEST--
+Test that an ignored CVE does not result in an error.
+--CONDITION--
+true
+--COMPOSER--
+{
+    "require-dev": {
+        "symfony/http-foundation": "=2.0.4"
+    },
+    "extra": {
+        "composer-audit": {
+            "ignore": [
+                {"type": "cve", "value": "CVE-2012-6431"},
+                {"type": "cve", "value": "CVE-2013-4752"},
+                {"type": "cve", "value": "CVE-2014-5244"}
+            ]
+        }
+    }
+}
+--ARGS--
+--EXPECT-EXIT--
+2
+--EXPECT-OUTPUT--
+Found 9 advisories affecting 1 package(s).
+
+composer://symfony/http-foundation (2.0.4)
+* Request::getClientIp() when the trust proxy mode is enabled
+  - <https://symfony.com/blog/security-release-symfony-2-0-19-and-2-1-4>
+* CVE-2014-6061 Security issue when parsing the Authorization header
+  - <https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6061>
+  - <https://symfony.com/cve-2014-6061>
+* CVE-2015-2309 Unsafe methods in the Request class
+  - <https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-2309>
+  - <https://symfony.com/cve-2015-2309>
+* CVE-2018-11386 Denial of service when using PDOSessionHandler
+  - <https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-11386>
+  - <https://symfony.com/cve-2018-11386>
+* CVE-2018-14773 Remove support for legacy and risky HTTP headers
+  - <https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-14773>
+  - <https://symfony.com/blog/cve-2018-14773-remove-support-for-legacy-and-risky-http-headers>
+* CVE-2019-18888 Prevent argument injection in a MimeTypeGuesser
+  - <https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-18888>
+  - <https://symfony.com/cve-2019-18888>
+
+3 advisories were ignored.

@@ -65,6 +65,24 @@ final class AuditCommand extends BaseCommand
         // NULL if option is unknown.
         $lockOption = $this->getComposer()->getConfig()->get('lock');
 
+        // Pull config from the extra array in composer.json.
+        $config = $this->getComposer()->getPackage()->getExtra()['composer-audit'] ?? [];
+        $ignoreCves = [];
+
+        foreach ($config['ignore'] ?? [] as $rule) {
+            $type = (string) $rule['type'] ?? '';
+            $value = (string) $rule['value'] ?? '';
+
+            if ($type === 'cve' && $value !== '') {
+                $ignoreCves[] = $value;
+            } else {
+                $output->writeln(sprintf(
+                    'Ignoring invalid ignore rule: `%s`',
+                    json_encode($rule)
+                ), OutputInterface::VERBOSITY_VERBOSE);
+            }
+        }
+
         if ($lockOption === null || $lockOption === true) {
             if (!$this->getComposer()->getLocker()->isLocked()) {
                 $output->writeln('<error>Lock file not found.</error>');
@@ -123,6 +141,7 @@ final class AuditCommand extends BaseCommand
                 return \count($packageAdvisories);
             }, $advisories));
             $packagesAffected = \count($advisories);
+            $ignoredAdvisories = 0;
 
             // @todo Pluralization?
             $output->writeln(sprintf(
@@ -133,12 +152,13 @@ final class AuditCommand extends BaseCommand
                 $packagesAffected
             ));
 
-            $output->writeln('');
+            $exitCode = 0;
 
             ksort($advisories, \SORT_NATURAL | \SORT_ASC);
+            $firstAdvisory = true;
 
             foreach ($advisories as $reference => $packageAdvisories) {
-                $output->writeln(sprintf('<info>composer://%s (%s)</info>', $reference, $packages[$reference]));
+                $firstAdvisoryForPackage = true;
 
                 foreach ($packageAdvisories as $advisory) {
                     $title = $advisory['title'];
@@ -166,6 +186,22 @@ final class AuditCommand extends BaseCommand
                         $cve = $cveLink = null;
                     }
 
+                    if (\in_array($cve, $ignoreCves, true)) {
+                        ++$ignoredAdvisories;
+
+                        continue;
+                    }
+
+                    if ($firstAdvisory) {
+                        $output->writeln('');
+                        $firstAdvisory = false;
+                    }
+
+                    if ($firstAdvisoryForPackage) {
+                        $output->writeln(sprintf('<info>composer://%s (%s)</info>', $reference, $packages[$reference]));
+                        $firstAdvisoryForPackage = false;
+                    }
+
                     if ($output->isDecorated()) {
                         $output->writeln(sprintf(
                             $cve !== null ? '* %s: %s' : '* %2$s',
@@ -185,12 +221,29 @@ final class AuditCommand extends BaseCommand
                             }
                         }
                     }
+
+                    $exitCode = 1;
                 }
 
-                $output->writeln('');
+                // Only need a spacer if any adisories were written.
+                if (!$firstAdvisory) {
+                    $output->writeln('');
+                }
             }
 
-            return 1;
+            if ($ignoredAdvisories) {
+                $output->writeln(sprintf(
+                    '<info>%u advisories were ignored.</info>',
+                    $ignoredAdvisories
+                ));
+
+                // Change exit code to indicate some things were ignored.
+                if ($exitCode === 1) {
+                    $exitCode = 2;
+                }
+            }
+
+            return $exitCode;
         }
 
         if ($output->isVerbose()) {

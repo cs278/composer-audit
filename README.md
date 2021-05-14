@@ -61,6 +61,54 @@ does not exist or it’s more than an hour old. For example:
 composer audit --update
 ```
 
+Configuration
+-------------
+
+Composer Audit can be configured using the [`extra`][composer.json extra] property
+in your `composer.json` file, all configuration should be supplied under the
+`composer-audit` key.
+
+```json
+{
+    ...
+    "extra": {
+        ...
+        "composer-audit": {
+            "option1": "super"
+        },
+        ...
+    },
+    ...
+}
+```
+
+### Ignoring an advisory
+
+Currently only filtering advisories by CVE is possible, further options are planned.
+
+#### Ignoring an advisory by CVE
+
+You are able to ignore warnings about an advisory by filtering based on its CVE
+reference, this is useful if you decide the risk is acceptable or not applicable
+and you cannot otherwise upgrade the package to resolve the problem.
+
+```json
+{
+    ...
+    "extra": {
+        ...
+        "composer-audit": {
+            "ignore": [
+                {"type": "cve", "value": "CVE-2000-1234567"},
+                {"type": "cve", "value": "CVE-2000-7654321"}
+            ]
+        },
+        ...
+    },
+    ...
+}
+```
+
 Example
 -------
 
@@ -88,5 +136,6 @@ composer://symfony/http-foundation (2.0.4)
 
 Hyperlinks will be rendered to the appropriate CVE and advisory where available.
 
+[composer.json extra]: https://getcomposer.org/doc/04-schema.md#extra
 [FriendsOfPHP/security-advisories]: https://github.com/FriendsOfPHP/security-advisories
 [security.symfony.com]: https://security.symfony.com/
