@@ -124,8 +124,23 @@ final class AuditCommand extends BaseCommand
 
         // Find all the advisories for installed packages.
         foreach ($packages as $name => $version) {
+            $output->writeln(sprintf(
+                'Checking <info>%s</info> (<info>%s</info>) for advisories...',
+                $name,
+                $name !== 'cs278/composer-audit' ? $version : 'N/A'
+            ), OutputInterface::VERBOSITY_DEBUG);
+
             foreach ($advisoriesManager->findByPackageNameAndVersion($name, $version) as $advisory) {
                 $advisories[$name][] = $advisory;
+            }
+
+            if (\count($advisories[$name] ?? []) > 0) {
+                $output->writeln(sprintf(
+                    'Found %u advisories for <info>%s</info> (<info>%s</info>)',
+                    \count($advisories[$name]),
+                    $name,
+                    $name !== 'cs278/composer-audit' ? $version : 'N/A'
+                ), OutputInterface::VERBOSITY_VERY_VERBOSE);
             }
         }
 
