@@ -1,0 +1,46 @@
+name: Smoke Tests
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        php:
+          - '7.4'
+          - '8.0'
+        deps:
+          - highest
+          - lowest
+      fail-fast: true
+    name: PHP ${{ matrix.php }} / ${{ matrix.deps }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@4067ce8b814db5bfc731c8906aa3034f28911e9f
+        with:
+          php-version: ${{ matrix.php }}
+      - name: Cache dependencies
+        uses: actions/cache@v1
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.json') }}
+          restore-keys: ${{ runner.os }}-composer-
+      - name: Enable assertions
+        run: echo 'zend.assertions=1' | sudo tee /etc/php/${{ matrix.php }}/cli/conf.d/assert.ini >/dev/null
+      - name: "Issue #18"
+        run: |
+          export COMPOSER_CACHE_DIR="$(composer global config cache-dir)"
+          export COMPOSER_HOME="$(mktemp -d)"
+          composer global config repositories.0 path "$(pwd)"
+          composer global require cs278/composer-audit:@dev
+          cd "$(mktemp -d)"
+          composer require --no-install cs278/mktemp
+          composer audit -vvv
