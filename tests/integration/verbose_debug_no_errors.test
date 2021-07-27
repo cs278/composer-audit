@@ -1,0 +1,17 @@
+--TEST--
+No packages results in no errors (debug level messages)
+--CONDITION--
+true
+--COMPOSER--
+{}
+--ARGS--
+-vvv
+--EXPECT-EXIT--
+0
+--EXPECT-OUTPUT--
+Checking cs278/composer-audit (dev-more-debug) for advisories...
+Checking symfony/deprecation-contracts (v2.4.0) for advisories...
+Checking symfony/polyfill-ctype (v1.23.0) for advisories...
+Checking symfony/polyfill-php80 (v1.23.0) for advisories...
+Checking symfony/yaml (v5.3.4) for advisories...
+No advisories found for any packages.

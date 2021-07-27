@@ -25,6 +25,7 @@ true
 Ignoring invalid ignore rule: `{"type":"package","value":"foo\/bar"}`
 Ignoring invalid ignore rule: `{"type":"cve","value":""}`
 Ignoring invalid ignore rule: `{"type":"","value":"test"}`
+Found 9 advisories for symfony/http-foundation (2.0.4)
 Found 9 advisories affecting 1 package(s).
 
 composer://symfony/http-foundation (2.0.4)
