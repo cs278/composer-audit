@@ -15,7 +15,7 @@ final class ComposerPlugin implements PluginInterface, Capable
 {
     public function activate(Composer $composer, IOInterface $io)
     {
-
+        PolyfillLoader::load($composer, $io);
     }
 
     public function deactivate(Composer $composer, IOInterface $io)
