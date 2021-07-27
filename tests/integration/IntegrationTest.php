@@ -108,6 +108,7 @@ final class IntegrationTest extends TestCase
             return new Process($args, $workingDir, [
                 'COMPOSER_HOME' => $workingDir.'/.composer',
                 'COMPOSER_CACHE_DIR' => self::$cacheDir,
+                'COMPOSER_AUDIT_TEST' => 1,
             ]);
         };
 
