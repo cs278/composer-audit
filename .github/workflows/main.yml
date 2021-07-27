@@ -52,7 +52,13 @@ jobs:
         run: |
           vendor/bin/simple-phpunit --version | head -n1 >&2
 
-          vendor/bin/simple-phpunit --verbose $args
+          echo "::group::Tests (w/ source composer/composer)"
+          vendor/bin/simple-phpunit --verbose
+          echo "::endgroup::"
+
+          echo "::group::Tests (w/ phar composer/composer)"
+          COMPOSER_AUDIT_TEST_COMPOSER_BINARY=$(which composer) vendor/bin/simple-phpunit --verbose
+          echo "::endgroup::"
   # Verifies that the plugin entry point still parses on PHP 5.3, users of 5.3
   # cannot use this Composer plugin but at least it won't break their Composer.
   legacy:

@@ -93,8 +93,17 @@ final class IntegrationTest extends TestCase
         }
 
         $workingDir = temporaryDir();
-        $composer = function (...$args) use ($workingDir) {
-            array_unshift($args, getcwd().'/vendor/bin/composer');
+
+        // Environment variable instructs tests to use another Composer binary,
+        // this allows testing with the systems Composer installation.
+        $composerBin = getenv('COMPOSER_AUDIT_TEST_COMPOSER_BINARY');
+
+        if (!is_string($composerBin) || is_dir($composerBin) || !is_executable($composerBin)) {
+            $composerBin = getcwd().'/vendor/bin/composer';
+        }
+
+        $composer = function (...$args) use ($composerBin, $workingDir) {
+            array_unshift($args, $composerBin);
 
             return new Process($args, $workingDir, [
                 'COMPOSER_HOME' => $workingDir.'/.composer',
