@@ -127,7 +127,7 @@ final class AuditCommand extends BaseCommand
             $output->writeln(sprintf(
                 'Checking <info>%s</info> (<info>%s</info>) for advisories...',
                 $name,
-                $version
+                $name !== 'cs278/composer-audit' ? $version : 'N/A'
             ), OutputInterface::VERBOSITY_DEBUG);
 
             foreach ($advisoriesManager->findByPackageNameAndVersion($name, $version) as $advisory) {
@@ -139,7 +139,7 @@ final class AuditCommand extends BaseCommand
                     'Found %u advisories for <info>%s</info> (<info>%s</info>)',
                     \count($advisories[$name]),
                     $name,
-                    $version
+                    $name !== 'cs278/composer-audit' ? $version : 'N/A'
                 ), OutputInterface::VERBOSITY_VERY_VERBOSE);
             }
         }
