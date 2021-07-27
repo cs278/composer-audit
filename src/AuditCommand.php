@@ -127,7 +127,7 @@ final class AuditCommand extends BaseCommand
             $output->writeln(sprintf(
                 'Checking <info>%s</info> (<info>%s</info>) for advisories...',
                 $name,
-                $name !== 'cs278/composer-audit' ? $version : 'N/A'
+                !self::isUnderTest() ? $version : 'N/A'
             ), OutputInterface::VERBOSITY_DEBUG);
 
             foreach ($advisoriesManager->findByPackageNameAndVersion($name, $version) as $advisory) {
@@ -139,7 +139,7 @@ final class AuditCommand extends BaseCommand
                     'Found %u advisories for <info>%s</info> (<info>%s</info>)',
                     \count($advisories[$name]),
                     $name,
-                    $name !== 'cs278/composer-audit' ? $version : 'N/A'
+                    !self::isUnderTest() ? $version : 'N/A'
                 ), OutputInterface::VERBOSITY_VERY_VERBOSE);
             }
         }
@@ -299,5 +299,18 @@ final class AuditCommand extends BaseCommand
         } else {
             $output->writeln('');
         }
+    }
+
+    /**
+     * Check if the command is being run by the test suite.
+     *
+     * This is used to hide version information which will go stale as new packages
+     * are published.
+     */
+    private static function isUnderTest(): bool
+    {
+        $value = filter_var(getenv('COMPOSER_AUDIT_TEST'), \FILTER_VALIDATE_BOOLEAN);
+
+        return $value !== null ? $value : false;
     }
 }

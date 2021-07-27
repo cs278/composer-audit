@@ -23,6 +23,9 @@
         "symfony/phpunit-bridge": "^5.2",
         "symfony/process": "^4.4 || ^5"
     },
+    "conflict": {
+        "symfony/yaml": "~4.4.27 || ~5.2.12 || ~5.3.4"
+    },
     "autoload": {
         "psr-4": {
             "Cs278\\ComposerAudit\\": "src"
