@@ -24,8 +24,14 @@ final class PolyfillLoader
                     $installPath = $composer->getInstallationManager()->getInstallPath($package);
 
                     foreach ($autoload['files'] as $file) {
-                        $io->debug(sprintf('PolyfillLoader found: %s %s', $package->getName(), $file));
-                        $includeFiles[] = $installPath.\DIRECTORY_SEPARATOR.$file;
+                        $path = $installPath.\DIRECTORY_SEPARATOR.$file;
+
+                        if (\file_exists($path)) {
+                            $io->debug(sprintf('PolyfillLoader found: %s %s', $package->getName(), $file));
+                            $includeFiles[] = $path;
+                        } else {
+                            $io->warning(sprintf('PolyfillLoader file not found: %s %s', $package->getName(), $path));
+                        }
                     }
                 }
             }
