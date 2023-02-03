@@ -143,7 +143,12 @@ final class IntegrationTest extends TestCase
                 }
             }
 
-            self::assertEquals($expectedOutput, $proc->getOutput());
+            // Filter out deprecation notices as there is no way of suppressing these when running Composer.
+            // https://github.com/composer/composer/blob/50cded331ced9acb4e926be3dda1f74b86af2a3b/bin/composer#L21
+            $output = \preg_replace('{\nDeprecated: .+?\n}m', '', $proc->getOutput());
+            $output = \preg_replace('{\nUser Deprecated: .+?\n}m', '', $output);
+
+            self::assertEquals($expectedOutput, $output);
             self::assertEquals($expectedExit, $proc->getExitCode());
         } finally {
             (new Filesystem())->remove($workingDir);
