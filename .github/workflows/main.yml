@@ -72,6 +72,7 @@ jobs:
         with:
           php-version: 5.3
           tools: composer:2.2
+          coverage: none
       - name: Syntax check
         run: |
           while read file; do
@@ -81,6 +82,7 @@ jobs:
         run: |
           composer global config allow-plugins.cs278/composer-audit true
           composer global config repositories.0 path "$(pwd)"
+          composer global require --ignore-platform-reqs symfony/yaml '~4.4'
           composer global require --ignore-platform-reqs cs278/composer-audit '*@dev'
 
           set +e
