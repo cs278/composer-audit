@@ -1,7 +1,7 @@
 --TEST--
 No packages results in no errors (debug level messages)
 --CONDITION--
-$isPackage('symfony/deprecation-contracts', '*')
+!$isPackage('symfony/deprecation-contracts', '*')
 --COMPOSER--
 {}
 --ARGS--
@@ -10,7 +10,6 @@ $isPackage('symfony/deprecation-contracts', '*')
 0
 --EXPECT-OUTPUT--
 Checking cs278/composer-audit (N/A) for advisories...
-Checking symfony/deprecation-contracts (N/A) for advisories...
 Checking symfony/polyfill-ctype (N/A) for advisories...
 Checking symfony/yaml (N/A) for advisories...
 No advisories found for any packages.
