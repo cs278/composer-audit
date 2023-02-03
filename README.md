@@ -9,6 +9,8 @@ vulnerabilities *without* sending your lock file to an
 [external service][security.symfony.com] or using
 [closed source software](https://github.com/symfony/cli/issues/37).
 
+Note this command is *distinct* from the `audit` command built into Composer ≥ 2.4.
+
 Installation
 ------------
 
@@ -39,7 +41,7 @@ library) the installed packages, located in `vendor/composer/installed.json`
 will be validated instead.
 
 ```sh
-composer audit
+composer security-audit
 ```
 
 ### Audit non development dependencies
@@ -48,7 +50,7 @@ Only audit your production dependencies from `composer.lock`, this option only
 works when there is a `composer.lock` file.
 
 ```sh
-composer audit --no-dev
+composer security-audit --no-dev
 ```
 
 ### Update security advisories database
@@ -58,7 +60,7 @@ option, without this option being supplied the database will be downloaded if it
 does not exist or it’s more than an hour old. For example:
 
 ```sh
-composer audit --update
+composer security-audit --update
 ```
 
 Configuration
@@ -119,7 +121,7 @@ composer require symfony/http-foundation 2.0.4
 # Require Composer Audit
 composer require --dev cs278/composer-audit ^1
 
-composer audit
+composer security-audit
 Found 9 advisories affecting 1 package(s).
 
 composer://symfony/http-foundation (2.0.4)
