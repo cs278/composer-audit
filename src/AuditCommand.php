@@ -30,7 +30,13 @@ final class AuditCommand extends BaseCommand
 
     protected function configure()
     {
-        $this->setName('audit');
+        $this->setName('security-audit');
+
+        // Register alias if there isn't a conflicting command.
+        if (!\class_exists(\Composer\Command\AuditCommand::class)) {
+            $this->setAliases(['audit']);
+        }
+
         $this->setDescription('Check packages for security advisories.');
         $this->addOption(
             'no-dev',

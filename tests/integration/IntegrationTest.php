@@ -128,7 +128,7 @@ final class IntegrationTest extends TestCase
                 $composer('update')->mustRun();
             }
 
-            $proc = $composer('audit', ...$args);
+            $proc = $composer('security-audit', ...$args);
 
             if ($expectedExit === 0) {
                 $proc->mustRun();

@@ -19,7 +19,8 @@ final class AuditNotCompatibleCommand extends BaseCommand
     protected function configure()
     {
         // Configuration is copied from AuditCommand so that the command accepts the same inputs.
-        $this->setName('audit');
+        $this->setName('security-audit');
+        $this->setAliases(array('audit'));
         $this->setDescription('Check packages for security advisories.');
         $this->addOption(
             'no-dev',

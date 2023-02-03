@@ -43,4 +43,4 @@ jobs:
           composer global require cs278/composer-audit:@dev
           cd "$(mktemp -d)"
           composer require --no-install cs278/mktemp
-          composer audit -vvv
+          composer security-audit -vvv
