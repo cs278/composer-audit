@@ -71,6 +71,7 @@ jobs:
       - uses: shivammathur/setup-php@4067ce8b814db5bfc731c8906aa3034f28911e9f
         with:
           php-version: 5.3
+          tools: composer:2.2
       - name: Syntax check
         run: |
           while read file; do
