@@ -80,6 +80,9 @@ final class IntegrationTest extends TestCase
             ],
             'config' => [
                 'notify-on-install' => false,
+                'allow-plugins' => [
+                    'cs278/composer-audit' => true,
+                ],
             ],
             'repositories' => [
                 ['type' => 'path', 'url' => getcwd()],

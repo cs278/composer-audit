@@ -76,6 +76,7 @@ jobs:
           done < <(find src/Legacy -type f -name "*.php")
       - name: Integration test
         run: |
+          composer global config allow-plugins.cs278/composer-audit true
           composer global config repositories.0 path "$(pwd)"
           composer global require --ignore-platform-reqs cs278/composer-audit '*@dev'
 

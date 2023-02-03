@@ -39,6 +39,7 @@ jobs:
         run: |
           export COMPOSER_CACHE_DIR="$(composer global config cache-dir)"
           export COMPOSER_HOME="$(mktemp -d)"
+          composer global config allow-plugins.cs278/composer-audit true
           composer global config repositories.0 path "$(pwd)"
           composer global require cs278/composer-audit:@dev
           cd "$(mktemp -d)"
