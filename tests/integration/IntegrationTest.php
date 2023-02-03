@@ -126,9 +126,20 @@ final class IntegrationTest extends TestCase
                 // Update the lock file with new requirements.
                 file_put_contents($workingDir.'/composer.json', json_encode($composerJson));
                 $composer('update', '--no-install')->mustRun();
+
+                $lockedPackages = self::extractLockedPackages($workingDir.'/composer.lock');
             } else {
                 file_put_contents($workingDir.'/composer.json', json_encode($composerJson));
                 $composer('update')->mustRun();
+
+                $lockedPackages = file_exists($workingDir.'/composer.lock')
+                    ? self::extractLockedPackages($workingDir.'/composer.lock')
+                    : null;
+            }
+
+            // Execute condition again now package data is available.
+            if (!self::executeCondition($condition, $lockedPackages)) {
+                $this->markTestSkipped($condition);
             }
 
             $proc = $composer('security-audit', ...$args);
@@ -180,14 +191,48 @@ final class IntegrationTest extends TestCase
         }
     }
 
-    private static function executeCondition(string $condition): bool
+    /** @return array<string,string> */
+    private static function extractLockedPackages(string $lockFile): array
+    {
+        $result = \json_decode(file_get_contents($lockFile), true);
+
+        if ($result === null) {
+            throw new \RuntimeException(sprintf('Failed to parse lock file: %s', $lockFile));
+        }
+
+        $packages = [];
+
+        foreach (['packages', 'packages-dev'] as $type) {
+            if (isset($result[$type])) {
+                foreach ($result[$type] as $package) {
+                    $packages[$package['name']] = $package['version'];
+                }
+            }
+        }
+
+        return $packages;
+    }
+
+    private static function executeCondition(string $condition, array $packages = null): bool
     {
         $template = <<<'EOT'
 $isComposer = function ($constraint) {
     return \Composer\Semver\Semver::satisfies(\Composer\Composer::VERSION, $constraint);
 };
 
-return %s;
+if ($packages === null) {
+    $isPackage = function () { return true; };
+} else {
+    $isPackage = function (string $package, string $constraint) use ($packages) {
+        return isset($packages[$package])
+            ? \Composer\Semver\Semver::satisfies($packages[$package], $constraint)
+            : false;
+    };
+}
+
+unset($packages); // Prevent direct access to packages data.
+
+return (%1$s);
 EOT;
 
         return (bool) eval(sprintf($template, $condition));
