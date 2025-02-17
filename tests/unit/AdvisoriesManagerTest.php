@@ -7,7 +7,6 @@ namespace Cs278\ComposerAudit;
 use Composer\Composer;
 use Composer\Semver\Semver;
 use PHPUnit\Framework\TestCase;
-use Symfony\Bridge\PhpUnit\SetUpTearDownTrait;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -19,8 +18,6 @@ use function Cs278\Mktemp\temporaryDir;
  */
 final class AdvisoriesManagerTest extends TestCase
 {
-    use SetUpTearDownTrait;
-
     /**
      * @dataProvider dataFindByPackageNameAndVersion
      *
