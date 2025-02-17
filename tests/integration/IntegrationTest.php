@@ -217,7 +217,7 @@ final class IntegrationTest extends TestCase
         return $packages;
     }
 
-    private static function executeCondition(string $condition, array $packages = null): bool
+    private static function executeCondition(string $condition, ?array $packages = null): bool
     {
         $template = <<<'EOT'
 $isComposer = function ($constraint) {
