@@ -1,7 +1,0 @@
-[
-    {
-        "location": "Composer\\Autoload\\ClassLoader::loadClass",
-        "message": "Since symfony/phpunit-bridge 5.3: The \"Symfony\\Bridge\\PhpUnit\\SetUpTearDownTrait\" trait is deprecated, use original methods with \"void\" return typehint.",
-        "count": 1
-    }
-]

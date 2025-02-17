@@ -25,6 +25,6 @@
 
     <php>
         <ini name="zend.assertions" value="1" />
-        <env name="SYMFONY_DEPRECATIONS_HELPER" value="baselineFile=tests/allowed.json" />
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="" />
     </php>
 </phpunit>
