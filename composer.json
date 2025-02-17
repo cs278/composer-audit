@@ -11,8 +11,8 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": ">= 7.1",
-        "composer-plugin-api": "^1.1 || ^2",
+        "php": ">= 7.2",
+        "composer-plugin-api": "^2",
         "symfony/yaml": "^4.4 || ^5 || ^6 || ^7"
     },
     "require-dev": {
@@ -35,6 +35,6 @@
         "sort-packages": true
     },
     "extra": {
-        "class": "Cs278\\ComposerAudit\\Legacy\\ComposerPlugin"
+        "class": "Cs278\\ComposerAudit\\ComposerPlugin"
     }
 }

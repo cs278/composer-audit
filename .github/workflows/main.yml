@@ -61,36 +61,3 @@ jobs:
           echo "::group::Tests (w/ phar composer/composer)"
           COMPOSER_AUDIT_TEST_COMPOSER_BINARY=$(which composer) vendor/bin/simple-phpunit --verbose
           echo "::endgroup::"
-  # Verifies that the plugin entry point still parses on PHP 5.3, users of 5.3
-  # cannot use this Composer plugin but at least it won't break their Composer.
-  legacy:
-    runs-on: ubuntu-latest
-    name: PHP 5.3
-    steps:
-      - uses: actions/checkout@v2
-      - uses: shivammathur/setup-php@d30ad8b1843ace22e6698ab99bbafaa747b6bd0d
-        with:
-          php-version: 5.3
-          tools: composer:2.2
-          coverage: none
-      - name: Syntax check
-        run: |
-          while read file; do
-            php -l "$file"
-          done < <(find src/Legacy -type f -name "*.php")
-      - name: Integration test
-        run: |
-          composer global config allow-plugins.cs278/composer-audit true
-          composer global config repositories.0 path "$(pwd)"
-          composer global require --ignore-platform-reqs symfony/yaml '~4.4'
-          composer global require --ignore-platform-reqs cs278/composer-audit '*@dev'
-
-          set +e
-          composer global audit -vvv
-          result=$?
-          set -e
-
-          if [ $result -ne 2 ]; then
-            echo "Expected audit command to exit with error code 2, got: ${result}" >&2
-            exit 1
-          fi
