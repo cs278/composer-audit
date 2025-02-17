@@ -57,7 +57,15 @@ final class AdvisoriesManager
             );
         }
 
-        return new self($installer);
+        $manager = new self($installer);
+
+        // Allow the advisories package to be overloaded using an environment variable.
+        // COMPOSER_AUDIT_ADVISORIES_PACKAGE=cs278/security-advisories:dev-special
+        if ('' !== $package = (string) getenv('COMPOSER_AUDIT_ADVISORIES_PACKAGE')) {
+            [$manager->packageName, $manager->packageConstraint] = explode(':', $package, 2);
+        }
+
+        return $manager;
     }
 
     public function mustUpdate()
