@@ -35,20 +35,46 @@ abstract class AdvisoriesInstaller implements AdvisoriesInstallerInterface
 
     public function install($varDirectory, $packageName, $packageConstraint)
     {
+        $package = "{$packageName}:{$packageConstraint}";
+
         if (is_file("{$varDirectory}/data.lock") && is_dir("{$varDirectory}/data")) {
-            $installedVersion = trim(file_get_contents("{$varDirectory}/data.lock"));
-            $lastUpdated = filemtime("{$varDirectory}/data.lock");
+            [
+                $mustUpdateLockFile,
+                $installedPackage,
+                $installedVersion,
+                $lastUpdated,
+            ] = $this->parseLockFile($varDirectory);
         } else {
+            $mustUpdateLockFile = true;
+            $installedPackage = null;
             $installedVersion = null;
             $lastUpdated = 0;
         }
 
+        $mustUpdate = $mustUpdateLockFile
+            || $this->mustUpdate
+            || $installedPackage === null
+            || $installedVersion === null
+            || $installedPackage !== $package
+            || (time() - $lastUpdated) > 3600;
+
+        $mustUpdateLockFile = $mustUpdateLockFile
+            || $installedPackage !== $package;
+
         // No version installed or an update is requested, fetch package data.
-        if ((time() - $lastUpdated) > 3600 || $this->mustUpdate) {
+        if ($mustUpdate) {
             $package = $this->repositoryManager->findPackage($packageName, $packageConstraint);
-            $version = $package->getName().'@'.$package->getFullPrettyVersion(false);
             $updated = true;
+
+            // Hack to support #gifref constraints.
+            if (preg_match('{#([a-f0-9]{40})$}', $packageConstraint, $m)) {
+                $package->setDistReference($m[1]);
+                $package->setSourceReference($m[1]);
+            }
+
+            $version = $package->getName().'@'.$package->getFullPrettyVersion(false, PackageInterface::DISPLAY_SOURCE_REF);
         } else {
+            $package = $installedPackage;
             $version = $installedVersion;
             $updated = false;
         }
@@ -59,8 +85,9 @@ abstract class AdvisoriesInstaller implements AdvisoriesInstallerInterface
             $fs->remove("{$varDirectory}/data");
 
             $this->downloadAndInstall("{$varDirectory}/data", $package);
-
-            file_put_contents("{$varDirectory}/data.lock", $version."\n");
+            $this->writeLockFile($varDirectory, $package, $version);
+        } elseif ($mustUpdateLockFile) {
+            $this->writeLockFile($varDirectory, $package, $version);
         } elseif ($updated) {
             touch("{$varDirectory}/data.lock");
         }
@@ -69,4 +96,33 @@ abstract class AdvisoriesInstaller implements AdvisoriesInstallerInterface
     }
 
     abstract protected function downloadAndInstall($targetDirectory, PackageInterface $package);
+
+    private function writeLockFile(string $varDirectory, string $package, string $version): void
+    {
+        \file_put_contents("{$varDirectory}/data.lock", \json_encode([
+            'v' => 2, // Lock file version.
+            'package' => $package,
+            'version' => $version,
+        ]));
+    }
+
+    /** @return array{bool,?string,?string,int} */
+    private function parseLockFile(string $varDirectory): array
+    {
+        $contents = trim(file_get_contents("{$varDirectory}/data.lock"));
+        $lastUpdated = filemtime("{$varDirectory}/data.lock");
+
+        if (substr($contents, 1) === '{') {
+            $contents = \json_decode($contents, true, 16);
+
+            return [
+                false,
+                $contents['package'],
+                $contents['version'],
+                $lastUpdated,
+            ];
+        }
+
+        return [true, null, $contents, $lastUpdated];
+    }
 }

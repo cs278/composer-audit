@@ -60,7 +60,7 @@ final class AuditCommand extends BaseCommand
         $this->updateAdvisories = (bool) $input->getOption('update');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $advisoriesManager = AdvisoriesManager::create($this->getComposer());
 

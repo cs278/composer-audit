@@ -112,6 +112,7 @@ final class IntegrationTest extends TestCase
                 'COMPOSER_HOME' => $workingDir.'/.composer',
                 'COMPOSER_CACHE_DIR' => self::$cacheDir,
                 'COMPOSER_AUDIT_TEST' => 1,
+                'COMPOSER_AUDIT_ADVISORIES_PACKAGE' => 'sensiolabs/security-advisories:dev-master#d1749520b5e16eceeb6bceeae73af790773a371b'
             ]);
         };
 
