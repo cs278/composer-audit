@@ -10,8 +10,16 @@ use Composer\IO\IOInterface;
  */
 final class PolyfillLoader
 {
+    private static $loaded = false;
+
     public static function load(Composer $composer, IOInterface $io)
     {
+        if (self::$loaded) {
+            return;
+        }
+
+        self::$loaded = true;
+
         $packages = $composer->getRepositoryManager()->getLocalRepository()->getPackages();
         $includeFiles = [];
 
