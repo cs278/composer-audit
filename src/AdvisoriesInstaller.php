@@ -63,16 +63,16 @@ abstract class AdvisoriesInstaller implements AdvisoriesInstallerInterface
 
         // No version installed or an update is requested, fetch package data.
         if ($mustUpdate) {
-            $package = $this->repositoryManager->findPackage($packageName, $packageConstraint);
+            $packageObj = $this->repositoryManager->findPackage($packageName, $packageConstraint);
             $updated = true;
 
             // Hack to support #gifref constraints.
             if (preg_match('{#([a-f0-9]{40})$}', $packageConstraint, $m)) {
-                $package->setDistReference($m[1]);
-                $package->setSourceReference($m[1]);
+                $packageObj->setDistReference($m[1]);
+                $packageObj->setSourceReference($m[1]);
             }
 
-            $version = $package->getName().'@'.$package->getFullPrettyVersion(false, PackageInterface::DISPLAY_SOURCE_REF);
+            $version = $packageObj->getName().'@'.$packageObj->getFullPrettyVersion(false, PackageInterface::DISPLAY_SOURCE_REF);
         } else {
             $package = $installedPackage;
             $version = $installedVersion;
@@ -84,7 +84,7 @@ abstract class AdvisoriesInstaller implements AdvisoriesInstallerInterface
             $fs->remove("{$varDirectory}/data.lock");
             $fs->remove("{$varDirectory}/data");
 
-            $this->downloadAndInstall("{$varDirectory}/data", $package);
+            $this->downloadAndInstall("{$varDirectory}/data", $packageObj);
             $this->writeLockFile($varDirectory, $package, $version);
         } elseif ($mustUpdateLockFile) {
             $this->writeLockFile($varDirectory, $package, $version);
