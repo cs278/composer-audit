@@ -112,7 +112,7 @@ abstract class AdvisoriesInstaller implements AdvisoriesInstallerInterface
         $contents = trim(file_get_contents("{$varDirectory}/data.lock"));
         $lastUpdated = filemtime("{$varDirectory}/data.lock");
 
-        if (substr($contents, 1) === '{') {
+        if (substr($contents, 0, 1) === '{') {
             $contents = \json_decode($contents, true, 16);
 
             return [
