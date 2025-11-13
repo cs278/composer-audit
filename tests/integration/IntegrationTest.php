@@ -100,6 +100,17 @@ final class IntegrationTest extends TestCase
 
         $workingDir = temporaryDir();
 
+        (new Filesystem())->dumpFile(
+            "{$workingDir}/.composer/config.json",
+            \json_encode([
+                'config' => [
+                    'audit' => [
+                        'block-insecure' => false,
+                    ],
+                ],
+            ])
+		);
+
         // Environment variable instructs tests to use another Composer binary,
         // this allows testing with the systems Composer installation.
         $composerBin = getenv('COMPOSER_AUDIT_TEST_COMPOSER_BINARY');
@@ -114,6 +125,7 @@ final class IntegrationTest extends TestCase
             return new Process($args, $workingDir, [
                 'COMPOSER_HOME' => $workingDir.'/.composer',
                 'COMPOSER_CACHE_DIR' => self::$cacheDir,
+                'COMPOSER_NO_AUDIT' => '1', // Disable built in auditing.
                 'COMPOSER_AUDIT_TEST' => 1,
                 'COMPOSER_AUDIT_ADVISORIES_PACKAGE' => 'sensiolabs/security-advisories:dev-master#d1749520b5e16eceeb6bceeae73af790773a371b'
             ]);
