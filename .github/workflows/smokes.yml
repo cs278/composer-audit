@@ -37,6 +37,7 @@ jobs:
         run: echo 'zend.assertions=1' | sudo tee /etc/php/${{ matrix.php }}/cli/conf.d/assert.ini >/dev/null
       - name: "Issue #18"
         run: |
+          export COMPOSER_NO_AUDIT=1
           export COMPOSER_CACHE_DIR="$(composer global config cache-dir)"
           export COMPOSER_HOME="$(mktemp -d)"
           composer global config allow-plugins.cs278/composer-audit true
