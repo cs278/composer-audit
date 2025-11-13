@@ -25,6 +25,6 @@
 
     <php>
         <ini name="zend.assertions" value="1" />
-        <env name="SYMFONY_DEPRECATIONS_HELPER" value="verbose=0" />
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="verbose=0&amp;max[direct]=0&amp;quiet[]=indirect&amp;quiet[]=other" />
     </php>
 </phpunit>
