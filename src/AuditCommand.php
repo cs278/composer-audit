@@ -28,7 +28,7 @@ final class AuditCommand extends BaseCommand
     /** @var bool */
     private $updateAdvisories;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('security-audit');
 
@@ -52,7 +52,7 @@ final class AuditCommand extends BaseCommand
         );
     }
 
-    protected function initialize(InputInterface $input, OutputInterface $output)
+    protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         parent::initialize($input, $output);
 
